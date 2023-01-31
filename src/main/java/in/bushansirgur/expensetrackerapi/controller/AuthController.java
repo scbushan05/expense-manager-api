@@ -1,7 +1,5 @@
 package in.bushansirgur.expensetrackerapi.controller;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +19,7 @@ import in.bushansirgur.expensetrackerapi.entity.UserModel;
 import in.bushansirgur.expensetrackerapi.security.CustomUserDetailsService;
 import in.bushansirgur.expensetrackerapi.service.UserService;
 import in.bushansirgur.expensetrackerapi.util.JwtTokenUtil;
+import jakarta.validation.Valid;
 
 @RestController
 public class AuthController {
