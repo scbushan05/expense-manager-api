@@ -3,8 +3,6 @@ package in.bushansirgur.expensetrackerapi.controller;
 import java.sql.Date;
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import in.bushansirgur.expensetrackerapi.entity.Expense;
 import in.bushansirgur.expensetrackerapi.service.ExpenseService;
+import jakarta.validation.Valid;
 
 @RestController
 public class ExpenseController {
