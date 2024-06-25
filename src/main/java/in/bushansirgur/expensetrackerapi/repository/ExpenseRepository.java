@@ -14,6 +14,8 @@ import in.bushansirgur.expensetrackerapi.entity.Expense;
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	
 	Page<Expense> findByUserIdAndCategory(Long userId, String category, Pageable page);
+
+	Page<Expense> findByUserIdAndCategoryId(Long userId, Long categoryId, Pageable page);
 	
 	Page<Expense> findByUserIdAndNameContaining(Long userId, String keyword, Pageable page);
 	
@@ -21,7 +23,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	
 	Page<Expense> findByUserId(Long userId, Pageable page);
 	
-	Optional<Expense> findByUserIdAndId(Long userId, Long expenseId);
+	Optional<Expense> findByUserIdAndExpenseId(Long userId, String expenseId);
 
 	
 }
