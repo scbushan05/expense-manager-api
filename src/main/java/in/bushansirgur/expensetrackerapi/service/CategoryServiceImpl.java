@@ -6,6 +6,7 @@ import in.bushansirgur.expensetrackerapi.entity.CategoryEntity;
 import in.bushansirgur.expensetrackerapi.entity.User;
 import in.bushansirgur.expensetrackerapi.exceptions.ItemExistsException;
 import in.bushansirgur.expensetrackerapi.exceptions.ResourceNotFoundException;
+import in.bushansirgur.expensetrackerapi.mappers.CategoryMapper;
 import in.bushansirgur.expensetrackerapi.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ public class CategoryServiceImpl implements CategoryService{
     private final CategoryRepository categoryRepository;
     private final UserService userService;
 
+    private final CategoryMapper categoryMapper;
+
     /**
      * This is for reading the categories from database
      * @return list
@@ -29,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public List<CategoryDTO> getAllCategories() {
         List<CategoryEntity> list = categoryRepository.findByUserId(userService.getLoggedInUser().getId());
-        return list.stream().map(categoryEntity -> mapToDTO(categoryEntity)).collect(Collectors.toList());
+        return list.stream().map(categoryEntity -> categoryMapper.mapToCategoryDTO(categoryEntity)).collect(Collectors.toList());
     }
 
     /**
@@ -43,9 +46,11 @@ public class CategoryServiceImpl implements CategoryService{
         if (isCategoryPresent) {
             throw new ItemExistsException("Category is already present for the name "+categoryDTO.getName());
         }
-        CategoryEntity newCategory = mapToEntity(categoryDTO);
+        CategoryEntity newCategory = categoryMapper.mapToCategoryEntity(categoryDTO);
+        newCategory.setCategoryId(UUID.randomUUID().toString());
+        newCategory.setUser(userService.getLoggedInUser());
         newCategory = categoryRepository.save(newCategory);
-        return mapToDTO(newCategory);
+        return categoryMapper.mapToCategoryDTO(newCategory);
     }
 
     /**
@@ -59,38 +64,6 @@ public class CategoryServiceImpl implements CategoryService{
             throw new ResourceNotFoundException("Category not found for the id "+categoryId);
         }
         categoryRepository.delete(optionalCategory.get());
-    }
-
-    /**
-     * Mapper method to convert category dto to cateogry entity
-     * @param categoryDTO
-     * @return CategoryEntity
-     * */
-    private CategoryEntity mapToEntity(CategoryDTO categoryDTO) {
-        return CategoryEntity.builder()
-                .name(categoryDTO.getName())
-                .description(categoryDTO.getDescription())
-                .categoryIcon(categoryDTO.getCategoryIcon())
-                .categoryId(UUID.randomUUID().toString())
-                .user(userService.getLoggedInUser())
-                .build();
-    }
-
-    /**
-     * Mapper method to convert Category entity to Category DTO
-     * @param categoryEntity
-     * @return CategoryDTO
-     * */
-    private CategoryDTO mapToDTO(CategoryEntity categoryEntity) {
-        return CategoryDTO.builder()
-                .categoryId(categoryEntity.getCategoryId())
-                .name(categoryEntity.getName())
-                .description(categoryEntity.getDescription())
-                .categoryIcon(categoryEntity.getCategoryIcon())
-                .createdAt(categoryEntity.getCreatedAt())
-                .updatedAt(categoryEntity.getUpdatedAt())
-                .user(mapToUserDTO(categoryEntity.getUser()))
-                .build();
     }
 
     /**
