@@ -2,6 +2,7 @@ package in.bushansirgur.expensetrackerapi.security;
 
 import java.io.IOException;
 
+import in.bushansirgur.expensetrackerapi.service.BlackListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +24,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	
 	@Autowired
 	private CustomUserDetailsService userDetailsService;
+	@Autowired
+	private BlackListService blackListService;
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -36,6 +39,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
 			
 			jwtToken = requestTokenHeader.substring(7);
+
+			if (jwtToken != null && blackListService.isTokenBlacklisted(jwtToken)) {
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
+			}
 			
 			try {
 				username = jwtTokenUtil.getUsernameFromToken(jwtToken);
