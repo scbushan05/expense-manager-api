@@ -1,6 +1,8 @@
 package in.bushansirgur.expensetrackerapi.controller;
 
 
+import in.bushansirgur.expensetrackerapi.service.BlackListService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import in.bushansirgur.expensetrackerapi.entity.AuthModel;
@@ -36,6 +39,9 @@ public class AuthController {
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
+
+	@Autowired
+	private BlackListService blackListService;
 	
 	@PostMapping("/login")
 	public ResponseEntity<JwtResponse> login(@RequestBody AuthModel authModel) throws Exception {
@@ -65,6 +71,21 @@ public class AuthController {
 	@PostMapping("/register")
 	public ResponseEntity<User> save(@Valid @RequestBody UserModel user) {
 		return new ResponseEntity<User>(userService.createUser(user), HttpStatus.CREATED);
+	}
+
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PostMapping("/signout")
+	public void logout(HttpServletRequest request) {
+		String jwtToken = extractJwtTokenFromRequest(request);
+		blackListService.addTokenToBlacklist(jwtToken);
+	}
+
+	private String extractJwtTokenFromRequest(HttpServletRequest request) {
+		String bearerToken = request.getHeader("Authorization");
+		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+			return bearerToken.substring(7);
+		}
+		return null;
 	}
 }
 
